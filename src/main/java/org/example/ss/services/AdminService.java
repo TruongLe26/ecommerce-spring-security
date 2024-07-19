@@ -1,7 +1,7 @@
 package org.example.ss.services;
 
 import lombok.RequiredArgsConstructor;
-import org.example.ss.dtos.LoginUserDto;
+import org.example.ss.models.dtos.LoginUserDto;
 import org.example.ss.entities.User;
 import org.example.ss.repositories.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;

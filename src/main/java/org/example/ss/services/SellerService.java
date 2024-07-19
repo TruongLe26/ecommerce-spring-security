@@ -1,8 +1,8 @@
 package org.example.ss.services;
 
 import lombok.RequiredArgsConstructor;
-import org.example.ss.dtos.LoginUserDto;
-import org.example.ss.dtos.RegisterUserDto;
+import org.example.ss.models.dtos.LoginUserDto;
+import org.example.ss.models.dtos.RegisterUserDto;
 import org.example.ss.entities.Role;
 import org.example.ss.entities.RoleEnum;
 import org.example.ss.entities.User;

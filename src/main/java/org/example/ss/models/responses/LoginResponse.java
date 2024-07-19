@@ -1,4 +1,4 @@
-package org.example.ss.responses;
+package org.example.ss.models.responses;
 
 import lombok.Builder;
 import lombok.Getter;

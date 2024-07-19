@@ -1,4 +1,4 @@
-package org.example.ss.dtos;
+package org.example.ss.models.dtos;
 
 import lombok.Builder;
 import lombok.Getter;

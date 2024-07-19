@@ -23,17 +23,6 @@ public class LogoutController {
 
     public final InMemoryTokenBlacklist tokenBlacklist;
 
-//    @PostMapping("/logout")
-//    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-//        String token = null;
-//        String authorizationHeader = request.getHeader("Authorization");
-//        if (StringUtils.hasText(authorizationHeader) && authorizationHeader.startsWith("Bearer ")) {
-//            token = authorizationHeader.substring(7);
-//        }
-//        tokenBlacklist.addToBlacklist(token);
-//        return ResponseEntity.ok("Logged out successfully");
-//    }
-
     @GetMapping("/loginAgain")
     public ResponseEntity<Map<String, Object>> index(HttpServletRequest request) {
         String token = null;

@@ -1,5 +1,6 @@
 package org.example.ss.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -49,7 +50,7 @@ public class User implements UserDetails {
 //    @OneToOne(cascade = CascadeType.REMOVE)
     @ManyToOne//(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false, referencedColumnName = "id")
-//    @JsonManagedReference
+    @JsonBackReference
     private Role role;
 
 //    @ManyToMany(fetch = FetchType.EAGER)
