@@ -1,11 +1,13 @@
 package org.example.ss.services;
 
 import lombok.RequiredArgsConstructor;
+import org.example.ss.exceptions.UserAlreadyExistedException;
 import org.example.ss.models.dtos.LoginUserDto;
 import org.example.ss.models.dtos.RegisterUserDto;
 import org.example.ss.entities.Role;
 import org.example.ss.entities.RoleEnum;
 import org.example.ss.entities.User;
+import org.example.ss.models.responses.LoginResponse;
 import org.example.ss.repositories.RoleRepository;
 import org.example.ss.repositories.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,52 +28,37 @@ import java.util.regex.Pattern;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
+    private final AuthenticationService authenticationService;
 
-    public User signUp(RegisterUserDto input) {
+    public User signUp(RegisterUserDto registerUserDto) {
         Optional<Role> optionalRole = roleRepository.findByName(RoleEnum.USER);
         if (optionalRole.isEmpty()) { return null; }
 
-        Optional<User> optionalUser = userRepository.findByEmail(input.getEmail());
-        if (optionalUser.isPresent()) { return null; }
+        Optional<User> optionalUser = userRepository.findByEmail(registerUserDto.getEmail());
+        if (optionalUser.isPresent()) {
+            throw new UserAlreadyExistedException(registerUserDto.getEmail());
+        }
 
         var user = User.builder()
-                .fullName(input.getFullName())
-                .email(input.getEmail())
-                .password(passwordEncoder.encode(input.getPassword()))
+                .fullName(registerUserDto.getFullName())
+                .email(registerUserDto.getEmail())
+                .password(passwordEncoder.encode(registerUserDto.getPassword()))
                 .role(optionalRole.get())
                 .build();
         return userRepository.save(user);
     }
 
-    public User authenticateRealUser(LoginUserDto input) throws AccessDeniedException {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        input.getEmail(),
-                        input.getPassword()
-                )
-        );
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        if (userDetails.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_USER"))) {
-            return userRepository.findByEmail(input.getEmail())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        } else {
-            throw new AccessDeniedException("User does not have the required role (USER)");
-        }
+    public LoginResponse authenticateUserAndGetLoginResponse(LoginUserDto loginUserDto) throws AccessDeniedException {
+        return authenticationService.authenticateUserAndGetLoginResponse(loginUserDto);
     }
 
-    public boolean checkValidEmail(RegisterUserDto input) {
-        String emailPattern = ".*@gmail\\.com$";
-        Pattern pattern = Pattern.compile(emailPattern);
-        Matcher matcher = pattern.matcher(input.getEmail());
-
-        return matcher.matches();
+    public User getAuthenticatedUser() {
+        return (User) authenticationService.getAuthentication().getPrincipal();
     }
-
 
     public List<User> allUsers() {
         List<User> users = new ArrayList<>();
@@ -83,15 +70,15 @@ public class UserService {
         return userRepository.findByRoleName(RoleEnum.SELLER);
     }
 
-    public User createSeller(RegisterUserDto input) {
+    public User createSeller(RegisterUserDto registerUserDto) {
         Optional<Role> optionalRole = roleRepository.findByName(RoleEnum.SELLER);
         if (optionalRole.isEmpty()) { return null; }
 
         var user = User
                 .builder()
-                .fullName(input.getFullName())
-                .email(input.getEmail())
-                .password(passwordEncoder.encode(input.getPassword()))
+                .fullName(registerUserDto.getFullName())
+                .email(registerUserDto.getEmail())
+                .password(passwordEncoder.encode(registerUserDto.getPassword()))
                 .role(optionalRole.get())
                 .build();
         return userRepository.save(user);

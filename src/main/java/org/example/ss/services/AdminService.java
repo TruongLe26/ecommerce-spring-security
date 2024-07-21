@@ -1,14 +1,9 @@
 package org.example.ss.services;
 
 import lombok.RequiredArgsConstructor;
-import org.example.ss.models.dtos.LoginUserDto;
 import org.example.ss.entities.User;
-import org.example.ss.repositories.UserRepository;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.example.ss.models.dtos.LoginUserDto;
+import org.example.ss.models.responses.LoginResponse;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
@@ -17,24 +12,13 @@ import java.nio.file.AccessDeniedException;
 @RequiredArgsConstructor
 public class AdminService {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserRepository userRepository;
+    private final AuthenticationService authenticationService;
 
-    public User authenticateRealAdmin(LoginUserDto input) throws AccessDeniedException {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        input.getEmail(),
-                        input.getPassword()
-                )
-        );
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        if (userDetails.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
-            return userRepository.findByEmail(input.getEmail())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        } else {
-            throw new AccessDeniedException("User does not have the required role (ADMIN)");
-        }
+    public LoginResponse authenticateAdminAndGetLoginResponse(LoginUserDto loginUserDto) throws AccessDeniedException {
+        return authenticationService.authenticateAdminAndGetLoginResponse(loginUserDto);
     }
 
+    public User getAuthenticatedAdmin() {
+        return (User) authenticationService.getAuthentication().getPrincipal();
+    }
 }

@@ -5,6 +5,7 @@ import org.example.ss.models.dtos.LoginUserDto;
 import org.example.ss.entities.User;
 import org.example.ss.models.responses.LoginResponse;
 import org.example.ss.services.AdminService;
+import org.example.ss.services.AuthenticationService;
 import org.example.ss.services.JwtService;
 import org.example.ss.services.UserService;
 import org.springframework.http.ResponseEntity;
@@ -22,42 +23,30 @@ import java.util.List;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class AdminController {
 
-    private final JwtService jwtService;
-    private final AdminService adminService;
     private final UserService userService;
+    private final AdminService adminService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) throws AccessDeniedException {
-        User authenticatedUser = adminService.authenticateRealAdmin(loginUserDto);
-        String jwtToken = jwtService.generateToken(authenticatedUser);
-        LoginResponse loginResponse = LoginResponse
-                .builder()
-                .token(jwtToken)
-                .expiresIn(jwtService.getExpirationTime())
-                .build();
-        return ResponseEntity.ok(loginResponse);
+        return ResponseEntity.ok(adminService.authenticateAdminAndGetLoginResponse(loginUserDto));
     }
 
     @GetMapping("/me")
-    @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> authenticatedAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(currentUser);
+        return ResponseEntity.ok(adminService.getAuthenticatedAdmin());
     }
 
     @GetMapping("/sellers")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<User>> allSellers() {
-        List<User> sellers = userService.allSellers();
-        return ResponseEntity.ok(sellers);
+        return ResponseEntity.ok(userService.allSellers());
     }
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<User>> allUsers() {
-        List<User> users = userService.allUsers();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.allUsers());
     }
 
 }
