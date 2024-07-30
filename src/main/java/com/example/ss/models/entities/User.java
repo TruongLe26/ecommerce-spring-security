@@ -47,7 +47,8 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    @ManyToMany(targetEntity = Role.class,
+    @ManyToMany(
+            targetEntity = Role.class,
             fetch = FetchType.EAGER,
             cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH})
     @JoinTable(
@@ -58,7 +59,7 @@ public class User implements UserDetails {
     @JsonManagedReference
     private Set<Role> roles;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH})
     private ForgotPassword forgotPassword;
 
     @Override

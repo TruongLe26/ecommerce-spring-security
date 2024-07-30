@@ -35,8 +35,11 @@ public class Role {
     @Column(nullable = false)
     private String description;
 
-    @ManyToMany(targetEntity = User.class, mappedBy = "roles",
-            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH})
+    @ManyToMany(
+            targetEntity = User.class,
+            mappedBy = "roles",
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH}
+    )
     @JsonBackReference
     private Set<User> users;
 

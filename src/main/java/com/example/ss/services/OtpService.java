@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Date;
@@ -49,6 +50,7 @@ public class OtpService {
         return ResponseEntity.ok("Email sent for verification!");
     }
 
+    @Transactional
     public ResponseEntity<String> verifyOtp(Integer otp, String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Please provide a valid email!"));
@@ -56,11 +58,11 @@ public class OtpService {
         ForgotPassword fp = forgotPasswordRepository.findByOtpAndUser(otp, user)
                 .orElseThrow(() -> new RuntimeException("Invalid OTP for email " + email));
         if (fp.getExpirationTime().before(Date.from(Instant.now()))) {
-            forgotPasswordRepository.deleteById(fp.getFpid());
+            forgotPasswordRepository.deleteById(fp.getId());
             return new ResponseEntity<>("OTP has expired!", HttpStatus.EXPECTATION_FAILED);
         }
 
-        forgotPasswordRepository.deleteById(fp.getFpid());
+        forgotPasswordRepository.deleteById(fp.getId());
         return ResponseEntity.ok("OTP verified!");
     }
 
